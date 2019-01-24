@@ -3,6 +3,7 @@ import os
 from tkinter import filedialog
 from tkinter import *
 import subprocess
+import ctypes
 
 ext = (".dd",".e01",".bin",".img",".ctr",".vmdk",".vdi",".vhd")
 
@@ -65,7 +66,7 @@ class AutomationGUI:
         path = self.textILocation.get("1.0",END)
         path = path.replace('\n','\\')
         listE01 = getImageFileList(path)
-        executeString = executeString + "\"" +  self.textXPath.get("1.0",END).replace('\n','') + "xwforensics64.exe\" "
+        executeString = executeString +  self.textXPath.get("1.0",END).replace('\n','') + "xwforensics64.exe "
         commandString = commandString + "NewCase:\"" + self.textXLocation.get("1.0",END).replace('\n','') + '\\' + self.textXName.get("1.0",END).replace('\n','') + "\" "
         for E01 in listE01:
             commandString = commandString + "AddImage:\"" + E01 + "\" "
@@ -75,7 +76,7 @@ class AutomationGUI:
             commandString = commandString + "Cfg:\"" + optConfig + "\" "
         commandString = commandString + "RVS:~auto"
         print(executeString + commandString)
-        subprocess.run([executeString,commandString])
+        ctypes.windll.shell32.ShellExecuteW(None,'open', executeString,commandString,None,1)
          
     def GetCaseDir(self):
         path = filedialog.askdirectory()

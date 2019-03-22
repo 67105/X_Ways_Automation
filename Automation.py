@@ -24,10 +24,11 @@ class AutomationGUI:
         self.labelTitle = tkinter.Label(master,text="Select Processing Options:")
         self.labelTitle.pack()
         self.labelTitle.grid(columnspan =2, sticky=W)
+        #x-ways path
         self.labelXPath = tkinter.Label(master,text="X-Ways Path:")
         self.labelXPath.grid(row=1)
         self.textXPath = tkinter.Text(master, height = 1,width =50)
-        self.textXPath.insert(END, "C:\\Program Files\\X-Ways Forensics\\")
+        self.textXPath.insert(END, "C:\\Program Files\\X-Ways Forensics")
         self.textXPath.grid(row=1,column=1)
         #case name
         self.labelXName = tkinter.Label(master,text="X-Ways Case Name:")
@@ -55,10 +56,17 @@ class AutomationGUI:
         self.textXConfig = tkinter.Text(master, height = 1,width =50)
         self.textXConfig.grid(row=5,column=1)
         self.buttonXConfig = Button(master, text="...",command=self.GetConfigFile)
-        self.buttonXConfig.grid(row=5,column=3)          
+        self.buttonXConfig.grid(row=5,column=3)
+        #override setting
+        self.labelXOverride = tkinter.Label(master,text="Override option:")
+        self.labelXOverride.grid(row=6)
+        self.var = StringVar(master)
+        self.var.set("0")
+        self.cmboOverride = OptionMenu(self.master,self.var,"0","1","2")
+        self.cmboOverride.grid(row=6,column=1)        
         #start button
         self.buttonStart = Button(master, text="Start",command=self.Start)
-        self.buttonStart.grid(row=6, column=1)
+        self.buttonStart.grid(row=7, column=1)
 
     def Start(self):
         commandString = ""
@@ -66,7 +74,10 @@ class AutomationGUI:
         path = self.textILocation.get("1.0",END)
         path = path.replace('\n','\\')
         listE01 = getImageFileList(path)
-        executeString = executeString +  self.textXPath.get("1.0",END).replace('\n','') + "xwforensics64.exe "
+        xwayPath = self.textXPath.get("1.0",END).replace('\n','')
+        if xwayPath[:1] != "\\":
+            xwayPath = xwayPath + "\\"
+        executeString = executeString +  xwayPath + "xwforensics64.exe "
         commandString = commandString + "NewCase:\"" + self.textXLocation.get("1.0",END).replace('\n','') + '\\' + self.textXName.get("1.0",END).replace('\n','') + "\" "
         for E01 in listE01:
             commandString = commandString + "AddImage:\"" + E01 + "\" "
@@ -74,7 +85,8 @@ class AutomationGUI:
         optConfig = optConfig.replace('\n','')
         if optConfig != "":
             commandString = commandString + "Cfg:\"" + optConfig + "\" "
-        commandString = commandString + "RVS:~auto"
+        commandString = commandString + "Override:" + self.var.get() + " "
+        commandString = commandString + "RVS:~ auto"
         print(executeString + commandString)
         ctypes.windll.shell32.ShellExecuteW(None,'open', executeString,commandString,None,1)
          
@@ -92,6 +104,8 @@ class AutomationGUI:
 
     def GetConfigFile(self):
         path = filedialog.askopenfilename()
+        path = path.replace('/','\\')
+        path = path.replace('\n','')
         self.textXConfig.insert(END, path)        
    
 
